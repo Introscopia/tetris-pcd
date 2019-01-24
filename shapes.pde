@@ -58,6 +58,7 @@ int[] wd = {0, 2, 3, 3, 3, 3, 3, 4, 1};
 int[] defSpeed = {1, 1, 1, 1, 1, 1, 1, 1, 2};
 
 //define uma nova peça
+//Trivia: as peças são chamadas de Tetrominos! https://en.wikipedia.org/wiki/Tetromino
 class TetrisShape {
   //cor
   color col;
@@ -105,11 +106,40 @@ class TetrisShape {
         newgeom[i][j] = geom[dim - j - 1][i];
       }
     }
-    geom = copy(newgeom);
+    arrayCopy(newgeom, geom);
+    
+    if( x < 0 ){ // colisões com a parede esquerda durante a rotação
+      boolean hit = false;;
+      for(int i=0; i<geom.length; i++){
+        if( geom[i][0] == 1 ){
+          hit = true;
+          break;
+        }
+      }
+      if( hit ){
+        this.moveX( -x );
+      }
+    }
+    
+    if( x >= tetris.nx - 3 ){ //colisões com a parede direita durante a rotação
+      boolean hit = false;
+      for( int j = 3; j >= 2; --j ){
+        for(int i=0; i<geom.length; i++){
+          if( geom[i][j] == 1 ){
+            hit = true;
+            break;
+          }
+        }
+        if( hit ){
+          this.moveX( (tetris.nx-j-1)-x );
+        }
+      }
+    }
   }
   
   //move horizontalmente
   //PS: tem um negócio estranho rolando, mas estou com preçuiça de arrumar, por isso o -1
+  //-Introscopia: acho q o problema é o uso da variavel dim. a largura da peça varia com as rotações.
   void moveX(int dx) {
     boolean test = collision(tetris.grid, tetris.nx, tetris.ny, dx, -1);
     if (!test) {
